@@ -1,0 +1,15 @@
+nguage: python
+python:
+  - "2.6"
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "pypy"
+# command to install dependencies
+install: "pip install -r requirements.txt"
+# command to run tests
+script:
+  - python setup.py build
+  - python setup.py sdist
+  - python setup.py bdist
+  - python setup.py test

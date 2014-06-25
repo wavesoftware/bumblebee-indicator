@@ -12,6 +12,7 @@ setup(
   license      = 'Apache License 2.0',
   packages     = ['bumblebee_indicator'],
   zip_safe     = True,
+  scripts      = ['bin/bumblebee-indicator'],
   package_data = { 
     '': ['resources/*']
   }
