@@ -4,8 +4,7 @@ import logging
 
 FORMAT = '%(asctime)-15s %(levelname)-10s %(message)s'
 
-logging.basicConfig(level=logging.DEBUG, format = FORMAT)
-# logging.basicConfig(level=logging.INFO, format = FORMAT)
+logging.basicConfig(level=logging.INFO, format = FORMAT)
 
 class ConfigDict:
 	'''The recursive class for building and representing objects with.'''
@@ -24,7 +23,7 @@ __dirname = p.dirname(p.abspath(__file__))
 
 paths = ConfigDict({
 	'python': __dirname,
-	'resources': p.join(p.dirname(__dirname), 'resources')
+	'resources': p.join(__dirname, 'resources')
 })
 
 PING_FREQUENCY = 500

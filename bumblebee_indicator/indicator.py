@@ -5,7 +5,7 @@ import sys
 import gtk
 import appindicator
 import os.path
-from pl.wavesoftware.bumblebee import Optimus
+from logic import Optimus
 
 class BumblebeeIndicator:
 	
