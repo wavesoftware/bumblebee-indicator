@@ -1,33 +1,84 @@
 
+import config
+import logging
 import sys
 import gtk
 import appindicator
+import os.path
+from pl.wavesoftware.bumblebee import Optimus
 
 class BumblebeeIndicator:
-    def __init__(self):
-        self.ind = appindicator.Indicator("new-gmail-indicator",
-                                           "indicator-messages",
-                                           appindicator.CATEGORY_APPLICATION_STATUS)
-        self.ind.set_status(appindicator.STATUS_ACTIVE)
-        self.ind.set_attention_icon("new-messages-red")
+	
+	BUMBLEBEE_ICON = config.get_resource('bumblebee-icon.png')
+	BUMBLEBEE_ICON_ACTIVE = config.get_resource('bumblebee-icon-active.png')
+	BUMBLEBEE_ICON_DUAL = config.get_resource('bumblebee-icon-dual.png')
+	
+	def __init__(self):
+		self.__ind = appindicator.Indicator("bumblebee-indicator", "", appindicator.CATEGORY_APPLICATION_STATUS)
+		self.__ind.set_status(appindicator.STATUS_ACTIVE)
+		self.__ind.set_icon(BumblebeeIndicator.BUMBLEBEE_ICON)
+		self.__ind.set_attention_icon(BumblebeeIndicator.BUMBLEBEE_ICON_ACTIVE)
 
-        self.menu_setup()
-        self.ind.set_menu(self.menu)
+		self.__menu = self.__menu_setup()
+		self.__ind.set_menu(self.__menu)
+		
+		self.__optimus = Optimus()
 
-    def menu_setup(self):
-        self.menu = gtk.Menu()
-        
-        self.dual_item = gtk.MenuItem("Dual screen: on")
-        self.dual_item.show()
-        self.menu.append(self.dual_item)
+	def __menu_setup(self):
+		menu = gtk.Menu()
+		
+		item = gtk.CheckMenuItem("Nvidia Optimus")
+		item.show()
+		item.set_active(False)
+		item.set_sensitive(False)
+		menu.append(item)
+		self.__optimus_item = item
+		
+		item = gtk.CheckMenuItem("Dual monitor")
+		item.show()
+		item.set_active(False)
+		menu.append(item)
+		self.__dual_item = item
 
-        self.quit_item = gtk.MenuItem("Quit")
-        self.quit_item.connect("activate", self.quit)
-        self.quit_item.show()
-        self.menu.append(self.quit_item)
+		item = gtk.MenuItem("Quit")
+		item.connect("activate", self.quit)
+		item.show()
+		menu.append(item)
+		return menu
+		
+	def __update_dual(self, dual):
+		curr = dual.is_active()
+		displ = self.__dual_item.get_active()
+		if curr != displ:
+			self.__dual_item.set_active(curr)
+		icon = self.__ind.get_attention_icon()
+		if curr and icon != BumblebeeIndicator.BUMBLEBEE_ICON_DUAL:
+			self.__ind.set_attention_icon(BumblebeeIndicator.BUMBLEBEE_ICON_DUAL)
+		if not curr and icon == BumblebeeIndicator.BUMBLEBEE_ICON_DUAL:
+			self.__ind.set_attention_icon(BumblebeeIndicator.BUMBLEBEE_ICON_ACTIVE)
+		
+	def __check_status(self):
+		displ = self.__optimus_item.get_active()
+		curr = self.__optimus.is_active()
+		
+		if curr != displ:
+			self.__optimus_item.set_active(curr)
+			if curr:
+				dual = self.__optimus.dual_monitor()
+				self.__update_dual(dual)
+				self.__ind.set_status(appindicator.STATUS_ATTENTION)
+			else:
+				self.__ind.set_status(appindicator.STATUS_ACTIVE)
+		return True
 
-    def main(self):
-        gtk.main()
-
-    def quit(self, widget):
-        sys.exit(0)
+	def main(self):
+		gtk.timeout_add(config.PING_FREQUENCY, self.__check_status)
+		try:
+			gtk.main()
+		except KeyboardInterrupt:
+			sys.exit(0)
+		except Exception, ex:
+			logging.error("Error: %s" % ex)
+			sys.exit(1)
+	def quit(self, widget):
+		sys.exit(0)
