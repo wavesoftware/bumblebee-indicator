@@ -1,6 +1,7 @@
 import logging
 import re
 import os.path as p
+import subprocess
 
 class Optimus:
 	
@@ -17,8 +18,23 @@ class Optimus:
 			ret = match != None
 			logging.debug('DualMonitor::is_active() %s' % repr(ret))
 			return ret
+			
 		def turn(self, setting = True):
-			pass
+			if setting:
+				ret = self.__exec('gksu /usr/local/bin/hidden/nvidia-enable')
+			else:
+				ret = self.__exec('gksu /usr/local/bin/hidden/nvidia-disable')
+			return ret
+			
+		def __exec(self, command):
+			logging.info("Exec[%s]" % command)
+			p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			retval = p.wait()
+			for line in p.stdout.readlines():
+				logging.debug("Exec[%s]: %s" % (command, line))
+			for line in p.stderr.readlines():
+				logging.error("Exec[%s]: %s" % (command, line))
+			return retval
 	
 	def __init__(self):
 		self.__dual = Optimus.DualMonitor(self)

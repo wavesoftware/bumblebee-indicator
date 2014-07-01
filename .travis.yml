@@ -6,10 +6,16 @@ python:
   - "3.4"
   - "pypy"
 # command to install dependencies
-install: "pip install -r requirements.txt"
+install: 
+  - "pip install -r development.deps"
+  - "apt-get install python-all fakeroot"
 # command to run tests
 script:
+  - python setup.py clean
   - python setup.py build
+  - python setup.py test
   - python setup.py sdist
   - python setup.py bdist
-  - python setup.py test
+  - python setup.py bdist_egg
+#  - python setup.py --command-packages=stdeb.command sdist_dsc bdist_deb
+  

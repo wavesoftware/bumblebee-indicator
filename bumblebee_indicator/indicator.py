@@ -35,6 +35,7 @@ class BumblebeeIndicator:
 		self.__optimus_item = item
 		
 		item = gtk.CheckMenuItem("Dual monitor")
+		item.connect("activate", self.turn_dual)
 		item.show()
 		item.set_active(False)
 		menu.append(item)
@@ -82,3 +83,13 @@ class BumblebeeIndicator:
 			sys.exit(1)
 	def quit(self, widget):
 		sys.exit(0)
+		
+	def turn_dual(self, widget):
+		setting = widget.get_active()
+		logging.info("Turning dual monitor to => %s" % setting)
+		dual = self.__optimus.dual_monitor()
+		dual.turn(setting)
+		self.__check_status()
+		return False
+		
+		
