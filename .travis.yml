@@ -7,8 +7,8 @@ python:
   - "pypy"
 # command to install dependencies
 install: 
-  - "pip install -r development.deps"
-  - "apt-get install python-all fakeroot"
+  - "sudo pip install -r development.deps"
+  - "sudo apt-get install python-all fakeroot"
 # command to run tests
 script:
   - python setup.py clean
